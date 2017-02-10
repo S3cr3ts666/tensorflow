@@ -13,3 +13,5 @@ node_modules
 *.pyc
 __pycache__
 *.swp
+tensorflow/core/platform/default/build_config.bzl-e
+tensorflow/core/platform/default/build_config_root.bzl-e
