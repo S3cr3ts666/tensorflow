@@ -52,6 +52,7 @@ py_library(
     srcs_version = "PY2AND3",
     deps = [
         ":debug_data",
+        ":debug_utils",
         "//tensorflow/python:framework_for_generated_wrappers",
         "//tensorflow/python:session_ops",
         "@six_archive//:six",
@@ -435,6 +436,7 @@ cuda_py_test(
         "//tensorflow/python:platform_test",
         "//tensorflow/python:variables",
     ],
+    tags = ["notsan"],
 )
 
 py_test(

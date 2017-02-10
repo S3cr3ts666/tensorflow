@@ -3362,6 +3362,33 @@ tf_cuda_cc_test(
 )
 
 tf_kernel_library(
+    name = "random_poisson_op",
+    prefix = "random_poisson_op",
+    deps = [
+        ":random_ops",
+        "//tensorflow/core:framework",
+        "//tensorflow/core:lib",
+        "//tensorflow/core:lib_internal",
+        "//tensorflow/core:random_ops_op_lib",
+    ],
+)
+
+tf_cuda_cc_test(
+    name = "random_poisson_op_test",
+    size = "small",
+    srcs = ["random_poisson_op_test.cc"],
+    deps = [
+        ":ops_util",
+        ":random_poisson_op",
+        "//tensorflow/core:core_cpu",
+        "//tensorflow/core:framework",
+        "//tensorflow/core:test",
+        "//tensorflow/core:test_main",
+        "//tensorflow/core:testlib",
+    ],
+)
+
+tf_kernel_library(
     name = "word2vec_kernels",
     prefix = "word2vec_kernels",
     deps = [
@@ -3768,6 +3795,7 @@ filegroup(
             "decode_gif_op.*",
             "identity_reader_op.*",
             "reader_base.*",
+            "remote_fused_graph_execute_op.*",
             "fixed_length_record_reader_op.*",
             "whole_file_read_ops.*",
             "sample_distorted_bounding_box_op.*",
@@ -4034,12 +4062,20 @@ cc_binary(
         "notap",
     ],
     deps = [
-        ":android_tensorflow_kernels",
         "//tensorflow/cc:cc_ops",
         "//tensorflow/cc:client_session",
-        "//tensorflow/core:android_tensorflow_lib",
-        "//tensorflow/core:android_tensorflow_test_lib",
-    ],
+    ] + select({
+        "//tensorflow:android": [
+            ":android_tensorflow_kernels",
+            "//tensorflow/core:android_tensorflow_lib",
+            "//tensorflow/core:android_tensorflow_test_lib",
+        ],
+        "//conditions:default": [
+            "//tensorflow/core:framework",
+            "//tensorflow/core:tensor_testutil",
+            "//tensorflow/core:test_main",
+        ],
+    }),
 )
 
 tf_cc_test(
@@ -4162,11 +4198,20 @@ cc_binary(
         "notap",
     ],
     deps = [
-        ":android_tensorflow_kernels",
         "//tensorflow/cc:cc_ops",
         "//tensorflow/cc:client_session",
-        "//tensorflow/core:android_tensorflow_test_lib",
-    ],
+    ] + select({
+        "//tensorflow:android": [
+            ":android_tensorflow_kernels",
+            "//tensorflow/core:android_tensorflow_lib",
+            "//tensorflow/core:android_tensorflow_test_lib",
+        ],
+        "//conditions:default": [
+            "//tensorflow/core:framework",
+            "//tensorflow/core:tensor_testutil",
+            "//tensorflow/core:test_main",
+        ],
+    }),
 )
 
 tf_cc_test(
@@ -4184,6 +4229,50 @@ tf_cc_test(
         "//tensorflow/core:framework",
         "//tensorflow/core:lib",
         "//tensorflow/core:protos_all_cc",
+        "//tensorflow/core:test",
+        "//tensorflow/core:test_main",
+        "//tensorflow/core:testlib",
+    ],
+)
+
+tf_kernel_library(
+    name = "remote_fused_graph_ops",
+    prefix = "remote_fused_graph_ops",
+    deps = [
+        ":remote_fused_graph_execute_op",
+        "//tensorflow/core:framework",
+        "//tensorflow/core:lib",
+        "//tensorflow/core:remote_fused_graph_ops_op_lib",
+        "//tensorflow/core/kernels/hexagon:graph_transferer",
+    ],
+)
+
+cc_library(
+    name = "remote_fused_graph_execute_op",
+    srcs = ["remote_fused_graph_execute_op.cc"],
+    deps = [
+        "//tensorflow/core:framework",
+        "//tensorflow/core:lib",
+        "//tensorflow/core:lib_internal",
+        "//tensorflow/core/kernels/hexagon:graph_transferer",
+    ],
+)
+
+tf_cc_test(
+    name = "remote_fused_graph_ops_test",
+    size = "small",
+    srcs = [
+        "remote_fused_graph_execute_op_test.cc",
+    ],
+    deps = [
+        ":ops_testutil",
+        ":ops_util",
+        ":remote_fused_graph_execute_op",
+        "//tensorflow/core:core_cpu",
+        "//tensorflow/core:framework",
+        "//tensorflow/core:lib",
+        "//tensorflow/core:protos_all_cc",
+        "//tensorflow/core:remote_fused_graph_ops_op_lib",
         "//tensorflow/core:test",
         "//tensorflow/core:test_main",
         "//tensorflow/core:testlib",
